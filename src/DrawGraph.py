@@ -1,14 +1,16 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
+plt.style.use('mystyle')
+
 #import pygraphviz as pgv
-#import networkx as nx
+
+import networkx as nx
+import csv
 import time
 
-T1ASes = [1, 174, 209, 286, 701, 702, 703, 1239, 1299, 2828, 2914, 3257, 3320, 3349, 3356, 5511, 6453, 6461, 6762, 7018, 12956]
-
-
-def draw(data):
+#CSVの重みつきエッジ、ノードデータからグラフ描画
+def draw():
     labels = None
     graph_layout = 'shell'
     node_size = 1600
@@ -22,35 +24,40 @@ def draw(data):
     text_font = 'sans-serif'
 
     G = nx.Graph()
-    print(data)
-    print(G.number_of_edges())
-    print("Drawing Graph...")
+#ノードデータ
+    print("Loading Node data...")
+    nodefile = open("../data/csv/nodes.csv","r")
+    reader = csv.reader(nodefile)
+    for row in reader:
+        G.add_node(row[0])
+#エッジデータ
+    print("Loading Edge data...")
+    edgefile = open("../data/csv/edges.csv","r")
+    reader = csv.reader(edgefile)
+    for row in reader:
+        G.add_edge(row[0], row[1], weight = int(row[2]))
 
-
-    #CSVGenerater.Edgedatagenerate(data)
-
-    #Tier1のASノード
-    G.add_nodes_from(T1ASes)
-    #リンク
-    for edge in data:
-        G.add_edge(edge[0], edge[1])
-
-    #Tier1ASのラベル
-    labels={}
-    for i in T1ASes:
-        labels[i]=str(i)
+#フィルタリング
+    elarge = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] > 50]
+    esmall = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= 50]
 
 #グラフ描画
+    print("Drawing Graph...")
     start_time = time.time()
-    nx.draw_networkx_nodes(G, nx.fruchterman_reingold_layout(G), node_size=20, nodelist=T1ASes ,alpha=node_alpha,node_color='red')
-    nx.draw_networkx_edges(G, nx.fruchterman_reingold_layout(G), width=edge_tickness, alpha=edge_alpha,edge_color=edge_color)
-    nx.draw_networkx_labels(G, nx.fruchterman_reingold_layout(G), labels, font_size=8)
+    #ばねモデル
+    pos = nx.spring_layout(G)
+    #ノード
+    nx.draw_networkx_nodes(G, pos, node_size=150)
+    #エッジ
+    nx.draw_networkx_edges(G, pos, edgelist=elarge,width=8, edge_color='g')
+    nx.draw_networkx_edges(G, pos, edgelist=esmall,width=3, alpha=0, edge_color='b', style='dashed')
+    #ラベル
+    nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
     elapsed_time = time.time() - start_time
-    print("Drew in " + str(elapsed_time) + "[sec].")
+    print("Drawn in " + str(elapsed_time) + "[sec].")
 
     plt.xticks([])
     plt.yticks([])
     plt.show()
-
 
 

@@ -56,7 +56,7 @@ def checkupdate(alldata):
 def readupdatedata():
     #-Mオプションで展開
     global alldata
-    for line in open('../data/updates/hijack', 'r'):
+    for line in open('../data/updates/YoutubePakistan(2008)/02241824', 'r'):
         #if line[0] == "#":
         #    continue
 

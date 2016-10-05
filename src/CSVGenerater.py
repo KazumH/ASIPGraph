@@ -9,7 +9,7 @@ def Edgedatagenerate(data):
     csvfile.close()
 
 def WeightedEdgedatagenerate(data):
-    csvfile = open('../data/csv/weightededges.csv', 'w', newline='')
+    csvfile = open('../data/csv/edges.csv', 'w', newline='')
     writer = csv.writer(csvfile, lineterminator='\n')
     for i in range(0, len(data)):
         writer.writerow(data[i])
