@@ -13,7 +13,7 @@ ip = []
 monitor_as = []
 ASes = np.empty((0, 1), int)
 allASes = []
-alllinks = [[]]
+alllinks = [[]] #[]にするとnumpy.sortがうまく働かなくなる。data[0] = []となる
 """
 class Prefix:
     def __init__(self, network, value, time. router, origin):
@@ -127,8 +127,68 @@ def readupdatedata():
     alluniquelinks = np.unique(alllinks)
     print("The number of unique links: ", len(alluniquelinks))
     linkdata = np.sort(alllinks)
-    CSVGenerater.Edgedatagenerate(linkdata)
+    #del linkdata[0:1] 先頭の[]を消したい・・・
+
+    #集計
+    weightedlinkdata = weightcounter(linkdata)
+
+    #CSVへ
+    #CSVGenerater.Edgedatagenerate(linkdata)
+    CSVGenerater.WeightedEdgedatagenerate(weightedlinkdata)
+
     #checkupdate(alldata)
+
+def weightcounter(data):
+    #weight = 1
+    pointer = 1
+    weighteddata = []
+    while pointer < len(data):
+        pointer, weighteddata = count(data, pointer, weighteddata)
+    print("Weight Count Finished!!!")
+    print(weighteddata)
+    return weighteddata
+
+def count(input, pointer, output):
+    weight = 1
+
+    for i in range(pointer, len(input)):
+        #print(input[i], input[i+1])
+        if i == len(input) - 1:
+            if weight >= 1:
+                newdata = input[i]
+                newdata.append(weight)  # ["10026", "75292, 3]
+                output.append(newdata)
+                break
+            else:
+                exit(1)
+        elif input[i] == input[i + 1]:
+            #print("Same")
+            weight += 1
+            #print(weight)
+        elif input[i] != input[i + 1]:
+            #print("Wrong")
+            newdata = input[i]
+            newdata.append(weight)  # ["10026", "75292, 3]
+            #print("Newdata:", newdata)
+            output.append(newdata)
+            break
+        else:
+            exit(1)
+
+    nextpointer = pointer + weight
+    #print(nextpointer)
+    #print(output)
+    #再起は1000回まで。
+    #count(input, nextpointer, output)  <- NG
+    return nextpointer, output
+
+    #print(output)
+
+    #del data[0:weight]  # 頭weight分消す
+    #nextdata = data
+    #if data == []:
+    #    return []
+    #return newdata + weightcounter(nextdata)
 
 #データチェックインターフェース
 def checkrel():
