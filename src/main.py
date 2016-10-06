@@ -10,7 +10,7 @@ def run():
     subprocess.call(cmd, shell=True)
 
 #データ読み込みと集計、結果をCSVで出力
-    ReadData.readupdatedata()
+    #ReadData.readupdatedata()
 
 #データチェック
 #    ReadData.checklink()
