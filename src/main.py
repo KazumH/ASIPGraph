@@ -10,7 +10,8 @@ def run():
     subprocess.call(cmd, shell=True)
 
 #データ読み込みと集計、結果をCSVで出力
-    #ReadData.readupdatedata()
+    rawdatafiles = ReadData.rawfilelisting("../data/updates/YoutubePakistan/")
+    ReadData.readupdatedata(rawdatafiles)
 
 #データチェック
 #    ReadData.checklink()
@@ -18,7 +19,7 @@ def run():
 
 
 # CSVからグラフへ
-    DrawGraph.draw()
+    #DrawGraph.draw()
 
 if __name__ == "__main__":
     run()
