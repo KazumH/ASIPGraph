@@ -29,20 +29,22 @@ def draw():
     nodelist4 = []
 
     G = nx.Graph()
-#1番目のデータ
-#ノードデータ
+
+# 1番目のデータ
+    # ノードデータ
     print("Loading Node data...")
-    nodefile = open("../data/csv/1/nodes.csv","r")
+    nodefile = open("../data/csv/1/nodes.csv", "r")
     reader = csv.reader(nodefile)
     for row in reader:
         nodelist1.append(row[0])
 
-#エッジデータ
+    # エッジデータ
     print("Loading Edge data...")
-    edgefile = open("../data/csv/1/edges.csv","r")
+    edgefile = open("../data/csv/1/edges.csv", "r")
     reader = csv.reader(edgefile)
     for row in reader:
-        G.add_edge(row[0], row[1], weight = int(row[2]), color = "yellow")
+        G.add_edge(row[0], row[1], weight=int(row[2]), color="yellow")
+
 
 # 2番目のデータ
 # ノードデータ
@@ -59,38 +61,24 @@ def draw():
     for row in reader:
         G.add_edge(row[0], row[1], weight=int(row[2]), color="green")
 
+    nodeset1 = set(nodelist1) #{'1', '2', '3'}
+    nodeset2 = set(nodelist2) #{'2', '3', '4'}
+    nodeset3 = set(nodelist3) #{'3', '4', '5'}
+    nodeset4 = set(nodelist4) #{'4', '5', '6'}
 
+    mergeset1_2 = nodeset1 | nodeset2 # {'1', '2', '3', '4'}
+    mergeset1_2_3 = mergeset1_2 | nodeset3 # {'1', '2', '3', '4', '5'}
+    mergeset1_2_3_4 = mergeset1_2_3 | nodeset4 # {'1', '2', '3', '4', '5', '6'}
 
+    newnodeset2 = mergeset1_2 ^ nodeset1 #{'4'}
+    newnodeset3 = mergeset1_2_3 ^ mergeset1_2 #{'5'}
+    newnodeset4 = mergeset1_2_3_4 ^ mergeset1_2_3 #{'6'}
 
-# 3番目のデータ
-# ノードデータ
-    print("Loading Node data...")
-    nodefile = open("../data/csv/3/nodes.csv", "r")
-    reader = csv.reader(nodefile)
-    for row in reader:
-        nodelist3.append(row[0])
-
-#エッジデータ
-    print("Loading Edge data...")
-    edgefile = open("../data/csv/3/edges.csv","r")
-    reader = csv.reader(edgefile)
-    for row in reader:
-        G.add_edge(row[0], row[1], weight = int(row[2]), color = "skyblue")
-
-# 4番目のデータ
-# ノードデータ
-    print("Loading Node data...")
-    nodefile = open("../data/csv/4/nodes.csv", "r")
-    reader = csv.reader(nodefile)
-    for row in reader:
-        nodelist4.append(row[0])
-
-# エッジデータ
-    print("Loading Edge data...")
-    edgefile = open("../data/csv/4/edges.csv", "r")
-    reader = csv.reader(edgefile)
-    for row in reader:
-        G.add_edge(row[0], row[1], weight=int(row[2]), color="violet")
+    newnodelist2 = list(newnodeset2)
+    newnodelist3 = list(newnodeset3)
+    newnodelist4 = list(newnodeset4)
+    print(newnodelist2)
+    nodelist4 = ["50"]
 
 #ノード設定
     nodes = np.unique(nodelist1 + nodelist2 + nodelist3 + nodelist4)
@@ -113,10 +101,10 @@ def draw():
     #ばねモデル(Fruchterman-Reingold)
     pos = nx.spring_layout(G)
     #ノード
-    nx.draw_networkx_nodes(G, pos, nodelist=nodelist1,node_color="b",alpha=0.2, linewidths=0)
-    nx.draw_networkx_nodes(G, pos, nodelist=nodelist2,node_color="g",alpha=0.4, linewidths=0)
-    nx.draw_networkx_nodes(G, pos, nodelist=nodelist3,node_color="r",alpha=0.6, linewidths=0)
-    nx.draw_networkx_nodes(G, pos, nodelist=nodelist4,node_color="y", linewidths=0)
+    nx.draw_networkx_nodes(G, pos, nodelist=nodelist1,node_color="b", alpha=0.5, linewidths=0)
+    nx.draw_networkx_nodes(G, pos, nodelist=newnodelist2,node_color="g", alpha=0.5, linewidths=0)
+    nx.draw_networkx_nodes(G, pos, nodelist=newnodelist3,node_color="r", alpha=0.5, linewidths=0)
+    nx.draw_networkx_nodes(G, pos, nodelist=newnodelist4,node_color="y", alpha=0.5, linewidths=0)
 
     #エッジ
     nx.draw_networkx_edges(G, pos, edgelist=ehuge,width=10, edge_color="green")
