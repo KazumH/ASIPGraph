@@ -13,13 +13,11 @@ latest_time = 0
 ip = []
 monitor_as = []
 ASes = np.empty((0, 1), int)
+overalllinks = [[]]
 allASes = []
-
-
 firstfile = 200802241824
 lastfile = 200802241909
 filenum = 4
-
 #dir = "../data/updates/YoutubePakistan/"
 
 #15分刻みのファイルのみに対応、bgpdumpの*.bz2ファイルの読み込みに多分使う
@@ -35,9 +33,8 @@ def bz2filelisting(first, last, num):
 #import osで一気にディレクトリ内全部を引っ張ってくるのが賢いのか・・・。復元した生データの読み込みに使う
 def rawfilelisting(dir):
     files = os.listdir(dir)
-    print(files)
+    print("Loading Target: ", files)
     return files
-
 
 """
 class Prefix:
@@ -59,16 +56,13 @@ class link:
 
 #アプデデータ読み込み
 def readupdatedata(filelist):
-    #-Mオプションで展開
+    #bgpdumpの-Mオプションで復元した場合
 
     num_of_files = len(filelist)
     for fileindex in range(num_of_files):
         alllinks = [[]]  # []にするとnumpy.sortがうまく働かなくなる。data[0] = []となる、
         print("Reading ", filelist[fileindex] )
         for line in open("../data/updates/YoutubePakistan/%s" % filelist[fileindex], "r"):
-            #if line[0] == "#":
-            #    continue
-
             word = line.split("|")
             #word[0]="BGP4MP" word[1]= 02/24/08 word[2]= "A" or "W", word[3]= ルータのIPアドレス word[4]=アナウンスしたAS word[5]= IPプリフィックス word[6]= ASパス(最右がオリジン)
             """
@@ -97,10 +91,11 @@ def readupdatedata(filelist):
                 for AS in ASlist:
                     allASes.append(int(AS))
 
-                #リンクデータの集計
+                #リンクデータの収集
                 for i in range(len(ASlist) - 1):
                     if ASlist[i] != ASlist[i+1]:
-                        alllinks.append([ASlist[i], ASlist[i+1]])
+                        alllinks.append([ASlist[i], ASlist[i+1]]) #1ファイル分のみのリンク
+                        overalllinks.append([ASlist[i], ASlist[i+1]]) #全ファイル分集計するためのリンク
                     else:
                         continue
 
@@ -150,16 +145,27 @@ def readupdatedata(filelist):
         #リンク(重みつき)
         CSVGenerater.WeightedEdgedatagenerate(dirnum, weightedlinkdata)
 
-#ファイル1つ分のデータのみ対応
+#複数ファイル分すべて集計したもの
+    overalluniquelinks = np.unique(overalllinks)
+    overalllinkdata = np.sort(overalllinks)
+    #重み集計なし
+    #CSVGenerater.OverallEdgedatagenerate(overalllinkdata)
+    weightedoveralllinkdata = weightcounter(overalllinkdata)
+    #CSVへ書き込む
+    #重み集計済み
+    CSVGenerater.OverallEdgedatagenerate(weightedoveralllinkdata)
+
+
+#同リンクが複数ある時、その分重みをインクリメントする・・・という集計。あらかじめデータは整理されていることが前提。
 def weightcounter(data):
     pointer = 1
     weighteddata = []
     print("----------------------Counting weight of edges...----------------------")
-    print(data)
+    #print(data)
     while pointer < len(data):
         pointer, weighteddata = count(data, pointer, weighteddata)
     print("----------------------Finished!!!----------------------")
-    print(weighteddata)
+    #print(weighteddata)
     return weighteddata
 
 def count(input, pointer, output):
@@ -200,43 +206,3 @@ def count(input, pointer, output):
     #再起は1000回まで。
     #count(input, nextpointer, output)  <- NG
     return nextpointer, output
-
-    #print(output)
-
-    #del data[0:weight]  # 頭weight分消す
-    #nextdata = data
-    #if data == []:
-    #    return []
-    #return newdata + weightcounter(nextdata)
-
-#データチェックインターフェース
-def checkrel():
-    i = input("Please input p2p or c2p or p2c: ")
-    if i == "all":
-        global alldata
-        alldata = linkdata[:, 0:2]
-        #DrawGraph.draw(alldata)
-    if i == "p2p":
-        global p2pdata
-        linktype = linkdata[:,2]
-        p2pdata = linkdata[linktype == 0, :]
-        p2p = p2pdata[:,0:2]
-        print("Peer-to-Peer Links List: ")
-        print("There are {0} p2p Links.".format(p2p.shape[0]))
-        TierSeparater.P2PExtract(p2p, T1ASes, 1)
-        #DrawGraph.draw(p2p)
-    elif i in {"p2c", "c2p"}:
-        global c2pdata
-        linktype = linkdata[:,2]
-        c2pdata = linkdata[linktype == -1, :]
-        c2p = c2pdata[:,0:2]
-        print("Customer-to-Provider(Provider-to-Customer) Links List: ")
-        print("There are {0} c2p links.".format(c2p.shape[0]))
-        TierSeparater.TierSeparate(c2p, -1)
-        #DrawGraph.draw(c2p)
-    elif i == "q":
-        print("Finish")
-        exit(0)
-    else:
-        print("Invalid Input!! Error!")
-        exit(1)

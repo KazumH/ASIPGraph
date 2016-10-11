@@ -24,3 +24,11 @@ def Nodedatagenerate(num, data):
     for AS in data:
         writer.writerow([AS])
     csvfile.close()
+
+def OverallEdgedatagenerate(data):
+    print("Writing in data/csv/overall/overalledges.csv")
+    csvfile = open('../data/csv/overall/overalledges.csv', 'w', newline='')
+    writer = csv.writer(csvfile, lineterminator='\n')
+    for i in range(1, len(data)):
+        writer.writerow(data[i])
+    csvfile.close()

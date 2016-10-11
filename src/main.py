@@ -2,8 +2,6 @@ import ReadData
 import DrawGraph
 import subprocess
 
-#MATRIX_SIZE = 1024
-
 def run():
 #ターミナルコマンド
     cmd = "ls"
@@ -11,15 +9,16 @@ def run():
 
 #データ読み込みと集計、結果をCSVで出力
     rawdatafiles = ReadData.rawfilelisting("../data/updates/YoutubePakistan/")
-    ReadData.readupdatedata(rawdatafiles)
+    #ReadData.readupdatedata(rawdatafiles)
 
 #データチェック
 #    ReadData.checklink()
 #    ReadData.checkupdate()
 
-
 # CSVからグラフへ
-    #DrawGraph.draw()
+    timerange = 60
+    number_of_files = int(timerange / 15)
+    DrawGraph.draw(number_of_files) #15分間分のファイル 4つ分読み込んでグラフへ
 
 if __name__ == "__main__":
     run()
